@@ -7,6 +7,7 @@ gem 'rails', '3.2.8'
 
 group :development, :test do
 	gem 'sqlite3'
+	gem 'jasminerice'
 end
 
 group :production do
@@ -23,10 +24,14 @@ group :assets do
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   # gem 'therubyracer', :platforms => :ruby
 
+  gem 'eco'
   gem 'uglifier', '>= 1.0.3'
 end
 
 gem 'jquery-rails'
+gem 'rails-backbone'
+gem 'twitter-bootstrap-rails', '2.1.9'
+
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

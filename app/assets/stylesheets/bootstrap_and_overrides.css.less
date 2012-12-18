@@ -1,0 +1,130 @@
+@import "twitter/bootstrap/bootstrap";
+body { 
+	padding-top: 40px;
+}
+
+@-webkit-keyframes stand {
+  from {
+    background-position: 0px;
+  }
+  to {
+    background-position: -250px;
+  }
+}
+
+@-moz-keyframes stand {
+  from {
+    background-position: 0px;
+  }
+  to {
+    background-position: -250px;
+  }
+}
+
+.bgLinearGradientSettings(@bg: #020031, @from: #020031, @to: #6d3353) {
+  background: @bg;
+  background: -moz-linear-gradient(45deg, @from 0%, @to 100%);
+  background: -webkit-linear(linear, left bottom, right top, color-stop(0%, @to));
+  background: -webkit-linear-gradient(45deg, @from 0%, @to 100%);
+  background: -o-linear-gradient(45deg, @from 0%, @to 100%);
+  background: -ms-linear-gradient(45deg, @from 0%, @to 100%);
+}
+
+.jumbotron {
+  position: relative;
+  padding: 40px 0;
+  color: #fff;
+  text-align: center;
+  //.bgLinearGradientSettings(#020031, #020031, #6d3353);
+  -webkit-box-shadow: inset 0 3px 7px rgba(0,0,0,.2), inset 0 -3px 7px rgba(0,0,0,.2);
+     -moz-box-shadow: inset 0 3px 7px rgba(0,0,0,.2), inset 0 -3px 7px rgba(0,0,0,.2);
+         -box-shadow: inset 0 3px 7px rgba(0,0,0,.2), inset 0 -3px 7px rgba(0,0,0,.2);
+  background: url(/assets/moon.gif);
+  h1 {
+    position: relative;
+    font-family: 'Press Start 2P';
+    font-size: 50px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-shadow: 0 5px 0px #4060f8;
+    z-index: 3;
+  }
+  :after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /*background: url(/assets/moon.gif);*/
+    /*z-index: 1;*/
+  }
+  .container {
+    position: relative;
+    height: 200px;
+  }
+}
+
+.subtitle {
+  height: 30px;
+  padding: 15px 0;
+  text-align: center;
+  background: #f5f5f5;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #ddd;
+}
+
+#earth {
+  position: absolute;
+  top: 20px;
+  left: 200px;
+  width: 96px;
+  height: 107px;
+  background-image: url(/assets/earth.gif);
+  z-index: 2;
+}
+
+#megaman {
+  position: absolute;
+  top: 191px;
+  left: 130px;
+  width: 50px;
+  height: 50px;
+  background-image: url(/assets/megaman.gif);
+  -webkit-animation: stand .3s steps(5, end) 1;
+     -moz-animation: stand .3s steps(5, end) 1;
+  z-index: 5;
+}
+
+@import "twitter/bootstrap/responsive";
+
+// Set the correct sprite paths
+@iconSpritePath: asset-path('twitter/bootstrap/glyphicons-halflings.png');
+@iconWhiteSpritePath: asset-path('twitter/bootstrap/glyphicons-halflings-white.png');
+
+// Set the Font Awesome (Font Awesome is default. You can disable by commenting below lines)
+// Note: If you use asset_path() here, your compiled boostrap_and_overrides.css will not 
+//       have the proper paths. So for now we use the absolute path.
+@fontAwesomeEotPath: '/assets/fontawesome-webfont.eot';
+@fontAwesomeWoffPath: '/assets/fontawesome-webfont.woff';
+@fontAwesomeTtfPath: '/assets/fontawesome-webfont.ttf';
+@fontAwesomeSvgPath: '/assets/fontawesome-webfont.svg';
+
+@fontPressStart2pWoffPath: '/assets/pressstart2p.woff';
+
+// Font Awesome
+@import "fontawesome";
+@import "pressstart2p";
+
+// Your custom LESS stylesheets goes here
+//
+// Since bootstrap was imported above you have access to its mixins which
+// you may use and inherit here
+//
+// If you'd like to override bootstrap's own variables, you can do so here as well
+// See http://twitter.github.com/bootstrap/less.html for their names and documentation
+//
+// Example:
+// @linkColor: #ff0000;
