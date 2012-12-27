@@ -1,8 +1,11 @@
 Secretdino::Application.routes.draw do
+  get "fighter/index"
+
   get "home/index"
 
   resources :users
   resources :pics
+  resources :fighter
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

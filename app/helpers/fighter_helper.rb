@@ -1,0 +1,2 @@
+module FighterHelper
+end
