@@ -113,6 +113,7 @@ $ ->
       action: null
 
   # Helper functions
+  # Frame Advantage, invoked by the Play button click event
   frameAdv = (atkStack) ->
     p1Startup = p1.normals[atkStack.p1.action].startup
     p2Startup = p2.normals[atkStack.p2.action].startup
@@ -123,6 +124,7 @@ $ ->
     else if p1Startup == p2Startup
       return "trade"
 
+  # Process Hit, invoked by the Play button click event
   hit = (result) ->
     console.log result
     # If the result is not an object then it's considered a trade
