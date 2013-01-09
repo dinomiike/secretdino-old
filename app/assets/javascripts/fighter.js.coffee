@@ -112,6 +112,42 @@ $ ->
     p2:
       action: null
 
+  # Helper functions
+  frameAdv = (atkStack) ->
+    p1Startup = p1.normals[atkStack.p1.action].startup
+    p2Startup = p2.normals[atkStack.p2.action].startup
+    if p1Startup < p2Startup
+      return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
+    else if p2Startup < p1Startup
+      return {player: p2, opponent: p1, playerLabel: "p2", targetLabel: "one"}
+    else if p1Startup == p2Startup
+      return "trade"
+
+  hit = (result) ->
+    console.log result
+    # If the result is not an object then it's considered a trade
+    if typeof result == "object"
+      result.opponent.hp -= result.player.normals[atkStack[result.playerLabel].action].damage
+      if result.opponent.isKO()
+        # Always set the hp to 0 on KO
+        result.opponent.hp = 0
+        result.opponent.percenthealth = 0
+        console.log "K.O."
+      else
+        # Otherwise just update percenthealth property
+        result.opponent.percenthealth = (result.opponent.hp/result.opponent.maxhealth)*100
+      # Reduce target health meter
+      $("."+result.targetLabel+" .bar .meter-full").attr("style", "width: "+result.opponent.percenthealth+"%")
+      # Check target health bar color
+      colorCheck = result.opponent.healthColor()
+      if colorCheck != result.opponent.metercolor
+        result.opponent.metercolor = colorCheck
+        $("."+result.targetLabel+" .bar .meter-full").addClass(colorCheck)
+        colorCheck = ""
+      $("."+result.targetLabel+" .hp").text(result.opponent.hp)
+    else
+      console.log "trade!!"
+
   # Populate the character dom elements
   $(".one .name").append(p1.name)
   $(".one .p1sprite").attr("src", "/assets/sprites/fighter/"+p1.sprite)
@@ -128,18 +164,19 @@ $ ->
     player = $(parentElement).attr("class").replace("controls ", "")
     # Assign the button input to attack
     attack = $(this).text()
+    ###
+    # TODO: all d-pad buttons resolve as blocks.
+    # Implement neutral/forward/back jumps and crouches which link with attacks
+    # Player should be able to input one movement and one action per turn
+    # One action should not be limited to a single button, consider specials, command throws, command normals, etc.
+    ###
     # If a non-attack button was hit...
-    if (!attack)
-      # Such as block...
-      if ($(this).attr("class").indexOf("block"))
-        # Insert block action to the attack stack
-        atkStack[player].action = "block"
-        attack = "block"
-      else
-        # Otherwise this isn't a vaild button
-        console.log "Invalid button input"
+    if ($(this).attr("class").indexOf("block") > 0)
+      # Set action to block
+      atkStack[player].action = "block"
+      attack = "block"
     else
-      # In this case, an attack button was pressed so we add the attack to the stack
+      # Otherwise an attack button was pressed, set the attack to the action button
       atkStack[player].action = attack
     console.log attack
     console.log player
@@ -148,52 +185,6 @@ $ ->
 
   # Play Button event binding
   $("#play").on("click", ->
-    frameAdv = (atkStack) ->
-      p1Startup = p1.normals[atkStack.p1.action].startup
-      p2Startup = p2.normals[atkStack.p2.action].startup
-      if p1Startup < p2Startup
-        return {
-          player: p1,
-          opponent: p2,
-          playerLabel: "p1",
-          targetLabel: "two"
-        }
-      else if p2Startup < p1Startup
-        return {
-          player: p2,
-          opponent: p1,
-          playerLabel: "p2",
-          targetLabel: "one"
-        }
-      else if p1Startup == p2Startup
-        return "trade"
-
-    hit = (result) ->
-      console.log result
-      # If the result is not an object then it's considered a trade
-      if typeof result == "object"
-        result.opponent.hp -= result.player.normals[atkStack[result.playerLabel].action].damage
-        if result.opponent.isKO()
-          # Always set the hp to 0 on KO
-          result.opponent.hp = 0
-          result.opponent.percenthealth = 0
-          console.log "K.O."
-        else
-          # Update percenthealth property
-          result.opponent.percenthealth = (result.opponent.hp/result.opponent.maxhealth)*100
-        # Reduce target health meter
-        $("."+result.targetLabel+" .bar .meter-full").attr("style", "width: "+result.opponent.percenthealth+"%")
-        # Check target health bar color
-        colorCheck = result.opponent.healthColor()
-        if colorCheck != result.opponent.metercolor
-          result.opponent.metercolor = colorCheck
-          $("."+result.targetLabel+" .bar .meter-full").addClass(colorCheck)
-          colorCheck = ""
-        $("."+result.targetLabel+" .hp").text(result.opponent.hp)
-      else
-        console.log result
-        console.log "trade!!"
-      
     # Ensure both players have input actions
     if atkStack.p1.action? && atkStack.p2.action?
       if atkStack.p1.action != "block"
@@ -201,66 +192,6 @@ $ ->
           hit(frameAdv(atkStack))
         else
           console.log "Nai"
-
-      # # # # # # # # # # #
-      # If p1 didn't block
-      #if atkStack.p1.action != "block"
-      #  # Did p2 block?
-      #  if atkStack.p2.action != "block"
-      #    # Perform p2's attack on p1
-      #    p1.hp -= p2.normals[atkStack.p2.action].damage
-      #    if p1.isKO()
-      #      # Always set the player hp to 0
-      #      p1.hp = 0
-      #      p1.percenthealth = 0
-      #      console.log "K.O."
-      #    else
-      #      # Update percenthealth property
-      #      p1.percenthealth = (p1.hp/p1.maxhealth)*100
-      #    # Reduce p1's health meter
-      #    $(".one .bar .meter-full").attr("style", "width: "+p1.percenthealth+"%")
-      #    # Check p1's health bar color
-      #    colorCheck = p1.healthColor()
-      #    if colorCheck != p1.metercolor
-      #      p1.metercolor = colorCheck
-      #      $(".one .bar .meter-full").addClass(colorCheck)
-      #      colorCheck = ""
-      #    $(".one .hp").text(p1.hp)
-      #  else
-      #    # Both blocked!
-      #    console.log "...Nothing happens!"
-      #else
-      #  # p1 blocked
-      #  console.log "p1 block!"
-
-      # If p2 didn't block
-      #if atkStack.p2.action != "block"
-      #  # Did p1 block?
-      #  if atkStack.p1.action != "block"
-      #    # Perform p1's attack on p2
-      #    p2.hp -= p1.normals[atkStack.p1.action].damage
-      #    if p2.isKO()
-      #      # Always set the player hp to 0
-      #      p2.hp = 0
-      #      p2.percenthealth = 0
-      #      console.log "K.O."
-      #    else
-      #      # Update percenthealth property
-      #      p2.percenthealth = (p2.hp/p2.maxhealth)*100
-      #    $(".two .bar .meter-full").attr("style", "width: "+p2.percenthealth+"%")
-      #    # Check p2's health bar color
-      #    colorCheck = p2.healthColor()
-      #    if colorCheck != p2.metercolor
-      #      p2.metercolor = colorCheck
-      #      $(".two .bar .meter-full").addClass(colorCheck)
-      #      colorCheck = ""
-      #    $(".two .hp").text(p2.hp)
-      #  else
-      #    # Both blocked!
-      #    console.log "...Nothing happens"
-      #else
-      #  # p2 blocked
-      #  console.log "p2 block!"
 
       # Reset the player action descriptions
       $(".one .action").text("")
@@ -272,6 +203,5 @@ $ ->
     else
       console.log "Both players must submit attacks to play"
   )
-
 
 
