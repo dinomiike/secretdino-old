@@ -8,12 +8,14 @@ $ ->
   console.log "Hello, fighter!"
 
   # Define the player object
-  window.Player = (name, hp, sprite, normals) ->
+  window.Player = (name, hp, linklimit, sprite, normals) ->
     this.name = name
     this.maxhealth = hp
     this.hp = hp
     this.percenthealth = 100
     this.metercolor = "meter-full"
+    this.linklimit = linklimit
+    this.framestatus = 0
     this.sprite = sprite
     this.normals = normals
     this.specials = {}
@@ -44,8 +46,8 @@ $ ->
       active: 3
       recovery: 6
       stun:
-        hit: 15
-        block: 10
+        hit: 13
+        block: 9
         value: 50
     b:
       range: 1
@@ -54,7 +56,7 @@ $ ->
       active: 3
       recovery: 12 
       stun:
-        hit: 18
+        hit: 19
         block: 13
         value: 100
     c:
@@ -64,11 +66,11 @@ $ ->
       active: 7
       recovery: 26
       stun:
-        hit: 20
-        block: 15
+        hit: 38
+        block: 20
         value: 200
   }
-  window.p1 = new Player "Ryu", 100, "ryu-p1.gif", p1normals
+  window.p1 = new Player "Ryu", 100, 6, "ryu-p1.gif", p1normals
 
   # Initialize player 2!
   p2normals = {
@@ -103,7 +105,7 @@ $ ->
         block: 15
         value: 140
   }
-  window.p2 = new Player "Dhalsim", 100, "dhalsim-p2.gif", p2normals
+  window.p2 = new Player "Dhalsim", 100, 6, "dhalsim-p2.gif", p2normals
 
   # Initialize the attack storage record
   window.atkStack =
@@ -115,8 +117,8 @@ $ ->
   # Helper functions
   # Frame Advantage, invoked by the Play button click event
   frameAdv = (atkStack) ->
-    p1Startup = p1.normals[atkStack.p1.action].startup
-    p2Startup = p2.normals[atkStack.p2.action].startup
+    p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
+    p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
     if p1Startup < p2Startup
       return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
     else if p2Startup < p1Startup
@@ -129,7 +131,14 @@ $ ->
     console.log result
     # If the result is not an object then it's considered a trade
     if typeof result == "object"
+      # Hit impacts opponent hp
       result.opponent.hp -= result.player.normals[atkStack[result.playerLabel].action].damage
+      # Inflict hit stun on opponent
+      result.opponent.framestatus = result.player.normals[atkStack[result.playerLabel].action].stun.hit
+      # Player frame status is frames of the attack
+      result.player.framestatus = result.player.normals[atkStack[result.playerLabel].action].startup +
+                                  result.player.normals[atkStack[result.playerLabel].action].active +
+                                  result.player.normals[atkStack[result.playerLabel].action].recovery
       if result.opponent.isKO()
         # Always set the hp to 0 on KO
         result.opponent.hp = 0
