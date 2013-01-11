@@ -70,6 +70,7 @@ $ ->
         block: 20
         value: 200
   }
+  # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
   window.p1 = new Player "Ryu", 100, 6, "ryu-p1.gif", p1normals
 
   # Initialize player 2!
@@ -105,6 +106,7 @@ $ ->
         block: 15
         value: 140
   }
+  # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
   window.p2 = new Player "Dhalsim", 100, 6, "dhalsim-p2.gif", p2normals
 
   # Initialize the attack storage record
@@ -120,15 +122,34 @@ $ ->
     p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
     p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
     if p1Startup < p2Startup
-      return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
+      # Set p1 frame status to the total frames of their attack
+      setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
+                         p1.normals[atkStack.p1.action].active +
+                         p1.normals[atkStack.p1.action].recovery)
+      # P2 receives the hit stun from the attack
+      setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
+      #return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
+      # Return the player who will be hit
+      return p2;
     else if p2Startup < p1Startup
-      return {player: p2, opponent: p1, playerLabel: "p2", targetLabel: "one"}
+      #return {player: p2, opponent: p1, playerLabel: "p2", targetLabel: "one"}
+      # Set P2 frame status to the total frames of the attack
+      setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
+                         p2.normals[atkStack.p2.action].active +
+                         p2.normals[atkStack.p2.action].recovery)
+      # P1 receives the hit stun from the attack
+      setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
+      # Return the player who will be hit
+      return p1;
     else if p1Startup == p2Startup
       return "trade"
 
+  # Set the frame status property of the player sent to this function
+  setFrameStatus = (player, frames) ->
+    player.framestatus = frames
+
   # Process Hit, invoked by the Play button click event
   hit = (result) ->
-    console.log result
     # If the result is not an object then it's considered a trade
     if typeof result == "object"
       # Hit impacts opponent hp
