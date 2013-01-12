@@ -129,8 +129,8 @@ $ ->
       # P2 receives the hit stun from the attack
       setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
       #return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
-      # Return the player who will be hit
-      return p2;
+      # Return the player who will be hit and the damage amount
+      return [p2, p1.normals[atkStack.p1.action].damage, "p2"];
     else if p2Startup < p1Startup
       #return {player: p2, opponent: p1, playerLabel: "p2", targetLabel: "one"}
       # Set P2 frame status to the total frames of the attack
@@ -140,45 +140,47 @@ $ ->
       # P1 receives the hit stun from the attack
       setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
       # Return the player who will be hit
-      return p1;
+      return [p1, p2.normals[atkStack.p2.action].damage, "p1"]
     else if p1Startup == p2Startup
-      return "trade"
+      #return "trade"
+      return [[p1, p2.normals[atkStack.p2.action].damage, "p1"], [p2, p1.normals[atkStack.p1.action].damage, "p2"]]
 
   # Set the frame status property of the player sent to this function
   setFrameStatus = (player, frames) ->
     player.framestatus = frames
 
   # Process Hit, invoked by the Play button click event
+  # result[0] is the Player instance (object)
+  # result[1] is the amount of damage this player is taking
+  # result[2] is the string id of the player, used for CSS
   hit = (result) ->
-    # If the result is not an object then it's considered a trade
-    if typeof result == "object"
+    # If the length of the first item is undefined, it's not an array, which indicates a trade
+    if result[0].length != "undefined"
       # Hit impacts opponent hp
-      result.opponent.hp -= result.player.normals[atkStack[result.playerLabel].action].damage
-      # Inflict hit stun on opponent
-      result.opponent.framestatus = result.player.normals[atkStack[result.playerLabel].action].stun.hit
-      # Player frame status is frames of the attack
-      result.player.framestatus = result.player.normals[atkStack[result.playerLabel].action].startup +
-                                  result.player.normals[atkStack[result.playerLabel].action].active +
-                                  result.player.normals[atkStack[result.playerLabel].action].recovery
-      if result.opponent.isKO()
+      result[0].hp -= result[1]
+      # Is the player KO'd?
+      if result[0].isKO()
         # Always set the hp to 0 on KO
-        result.opponent.hp = 0
-        result.opponent.percenthealth = 0
+        result[0].hp = 0
+        result[0].percenthealth = 0
         console.log "K.O."
       else
-        # Otherwise just update percenthealth property
-        result.opponent.percenthealth = (result.opponent.hp/result.opponent.maxhealth)*100
+        # If not, update percenthealth property
+        result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
       # Reduce target health meter
-      $("."+result.targetLabel+" .bar .meter-full").attr("style", "width: "+result.opponent.percenthealth+"%")
+      $("."+result[2]+" .bar .meter-full").attr("style", "width: "+result[0].percenthealth+"%")
       # Check target health bar color
-      colorCheck = result.opponent.healthColor()
-      if colorCheck != result.opponent.metercolor
-        result.opponent.metercolor = colorCheck
-        $("."+result.targetLabel+" .bar .meter-full").addClass(colorCheck)
+      colorCheck = result[0].healthColor()
+      if colorCheck != result[0].metercolor
+        result[0].metercolor = colorCheck
+        $("."+result[2]+" .bar .meter-full").addClass(colorCheck)
         colorCheck = ""
-      $("."+result.targetLabel+" .hp").text(result.opponent.hp)
+      $("."+result[2]+" .hp").text(result[0].hp)
+      # Strip this set of data out of the array and recurse
+      # When the result array is empty, end
     else
       console.log "trade!!"
+      # In the event of a trade, let's recurse the hit function with just the first element of the array, then the 2nd
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
