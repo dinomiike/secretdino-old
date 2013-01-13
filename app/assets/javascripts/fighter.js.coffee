@@ -66,8 +66,8 @@ $ ->
       active: 7
       recovery: 26
       stun:
-        hit: 38
-        block: 20
+        hit: 40
+        block: 26
         value: 200
   }
   # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
@@ -82,7 +82,7 @@ $ ->
       active: 4
       recovery: 9
       stun:
-        hit: 15
+        hit: 16
         block: 10
         value: 50
     b:
