@@ -78,7 +78,7 @@ $ ->
     a:
       range: 1
       damage: 30
-      startup: 4
+      startup: 3 # normally 4, change it back later
       active: 4
       recovery: 9
       stun:
@@ -116,7 +116,9 @@ $ ->
     p2:
       action: null
 
+  ##########################################################################################
   # Helper functions
+
   # Frame Advantage, invoked by the Play button click event
   frameAdv = (atkStack) ->
     p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
@@ -130,9 +132,8 @@ $ ->
       setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
       #return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
       # Return the player who will be hit and the damage amount
-      return [p2, p1.normals[atkStack.p1.action].damage, "p2"];
+      return [p2, p1.normals[atkStack.p1.action].damage, "two"];
     else if p2Startup < p1Startup
-      #return {player: p2, opponent: p1, playerLabel: "p2", targetLabel: "one"}
       # Set P2 frame status to the total frames of the attack
       setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
                          p2.normals[atkStack.p2.action].active +
@@ -140,10 +141,10 @@ $ ->
       # P1 receives the hit stun from the attack
       setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
       # Return the player who will be hit
-      return [p1, p2.normals[atkStack.p2.action].damage, "p1"]
+      return [p1, p2.normals[atkStack.p2.action].damage, "one"]
     else if p1Startup == p2Startup
-      #return "trade"
-      return [[p1, p2.normals[atkStack.p2.action].damage, "p1"], [p2, p1.normals[atkStack.p1.action].damage, "p2"]]
+      # Trade! Both players are hit, send both to the hit function
+      return [[p1, p2.normals[atkStack.p2.action].damage, "one"], [p2, p1.normals[atkStack.p1.action].damage, "two"]]
 
   # Set the frame status property of the player sent to this function
   setFrameStatus = (player, frames) ->
@@ -154,8 +155,8 @@ $ ->
   # result[1] is the amount of damage this player is taking
   # result[2] is the string id of the player, used for CSS
   hit = (result) ->
-    # If the length of the first item is undefined, it's not an array, which indicates a trade
-    if result[0].length != "undefined"
+    # Look at the first item of the result array
+    if Object.prototype.toString.call(result[0]) == "[object Object]"
       # Hit impacts opponent hp
       result[0].hp -= result[1]
       # Is the player KO'd?
@@ -176,11 +177,10 @@ $ ->
         $("."+result[2]+" .bar .meter-full").addClass(colorCheck)
         colorCheck = ""
       $("."+result[2]+" .hp").text(result[0].hp)
-      # Strip this set of data out of the array and recurse
-      # When the result array is empty, end
     else
       console.log "trade!!"
-      # In the event of a trade, let's recurse the hit function with just the first element of the array, then the 2nd
+      # In the event of a trade, let's run hit on each item in the array
+      _.each(result, hit)
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
