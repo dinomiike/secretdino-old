@@ -120,7 +120,7 @@ $ ->
   # Helper functions
 
   # Frame Advantage, invoked by the Play button click event
-  frameAdv = (atkStack) ->
+  window.frameAdv = ->
     p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
     p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
     if p1Startup < p2Startup
@@ -147,14 +147,14 @@ $ ->
       return [[p1, p2.normals[atkStack.p2.action].damage, "one"], [p2, p1.normals[atkStack.p1.action].damage, "two"]]
 
   # Set the frame status property of the player sent to this function
-  setFrameStatus = (player, frames) ->
+  window.setFrameStatus = (player, frames) ->
     player.framestatus = frames
 
   # Process Hit, invoked by the Play button click event
   # result[0] is the Player instance (object)
   # result[1] is the amount of damage this player is taking
   # result[2] is the string id of the player, used for CSS
-  hit = (result) ->
+  window.hit = (result) ->
     # Look at the first item of the result array
     if Object.prototype.toString.call(result[0]) == "[object Object]"
       # Hit impacts opponent hp
@@ -223,7 +223,7 @@ $ ->
     if atkStack.p1.action? && atkStack.p2.action?
       if atkStack.p1.action != "block"
         if atkStack.p2.action != "block"
-          hit(frameAdv(atkStack))
+          hit(frameAdv())
         else
           console.log "Nai"
 
