@@ -1,6 +1,4 @@
 describe "DinoFighter", ->
-	#it "should evaluate", ->
-  #  expect(123).toEqual(123)
   describe "Player Object", ->
     it "should create a Player1 and Player2 object", ->
       expect(p1).toEqual(jasmine.any(Object))

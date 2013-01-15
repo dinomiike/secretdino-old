@@ -1,7 +1,3 @@
-# Place all the behaviors and hooks related to the matching controller here.
-# All this logic will automatically be available in application.js.
-# You can use CoffeeScript in this file: http://jashkenas.github.com/coffee-script/
-
 # Frame data counts at 60 frames per second
 $ ->
   # Greetings!
@@ -130,7 +126,6 @@ $ ->
                          p1.normals[atkStack.p1.action].recovery)
       # P2 receives the hit stun from the attack
       setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
-      #return {player: p1, opponent: p2, playerLabel: "p1", targetLabel: "two"}
       # Return the player who will be hit and the damage amount
       return [p2, p1.normals[atkStack.p1.action].damage, "two"];
     else if p2Startup < p1Startup
