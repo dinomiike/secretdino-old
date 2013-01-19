@@ -4,13 +4,29 @@
 
 h1 {
   text-align: center;
+  color: #fff;
+  text-shadow: 0 1px 0 #ccc,
+               0 2px 0 #c9c9c9,
+               0 3px 0 #bbb,
+               0 4px 0 #b9b9b9,
+               0 5px 0 #aaa,
+               0 6px 1px rgba(0, 0, 0, .1),
+               0 0 5px rgba(0, 0, 0, .1),
+               0 1px 3px rgba(0, 0, 0, .3),
+               0 3px 5px rgba(0, 0, 0, .2),
+               0 5px 10px rgba(0, 0, 0, .25),
+               0 10px 10px rgba(0, 0, 0, .2),
+               0 20px 15px rgba(0, 0, 0, .15);
 }
 
-/*.console {
+.console {
+  width: 1170px;
+  height: 400px;
   background: url(/assets/sprites/fighter/japan_stage.png);
   background-repeat: no-repeat;
-  background-size: 100% 100%;
-}*/
+  background-size: 100% 75%;
+  padding: 20px;
+}
 
 .source-image {
   width: 100%;
@@ -35,7 +51,6 @@ h1 {
     padding: 0 0 10px 50px;
   }
 
-
   .number {
     height: 15px;
     font-size: 10px;
@@ -43,10 +58,14 @@ h1 {
     color: #aaa;
   }
 
-  > .sprite {
+  > .side {
+    padding-top: 130px;
+  }
+
+  /*> .sprite {
     width: 84px;
     height: 96px;
-  }
+  }*/
 
   div > .name {
     font-size: 20px;
@@ -61,6 +80,10 @@ h1 {
                  -1px 1px 0 #fff,
                  1px 0px 0 #fff;
   }
+}
+
+.controls {
+  padding-top: 30px;
 }
 
 .one {
