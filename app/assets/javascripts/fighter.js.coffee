@@ -179,18 +179,18 @@ $ ->
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
-  $(".one .p1sprite").attr("src", "/assets/sprites/fighter/"+p1.sprite)
+  $(".one .p1sprite").prop("src", "/assets/sprites/fighter/"+p1.sprite)
   $(".one .hp").append(p1.hp)
 
   $(".two .name").append(p2.name)
-  $(".two .p2sprite").attr("src", "/assets/sprites/fighter/"+p2.sprite)
+  $(".two .p2sprite").prop("src", "/assets/sprites/fighter/"+p2.sprite)
   $(".two .hp").append(p2.hp)
 
   # Attack Button event bindings
   $(".controls button").on("click", ->
-    console.log $(this).attr("class")
+    console.log $(this).prop("class")
     parentElement = $($(this).parent()[0]).parent()[0]
-    player = $(parentElement).attr("class").replace("controls ", "")
+    player = $(parentElement).prop("class").replace("controls ", "")
     # Assign the button input to attack
     attack = $(this).text()
     ###
@@ -200,7 +200,7 @@ $ ->
     # One action should not be limited to a single button, consider specials, command throws, command normals, etc.
     ###
     # If a non-attack button was hit...
-    if ($(this).attr("class").indexOf("block") > 0)
+    if ($(this).prop("class").indexOf("block") > 0)
       # Set action to block
       atkStack[player].action = "block"
       attack = "block"
