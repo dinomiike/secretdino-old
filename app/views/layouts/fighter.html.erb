@@ -10,7 +10,10 @@
   <meta name="description" content="Personal web-based projects and designs">
   <meta name="keywords" content="secret dinosaur handshake, secret dino handshake, secret dino">
   <meta name="author" content="Miike Ramos">
-  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%#= stylesheet_link_tag    "application", :media => "all" %>
+  <link href="/assets/bootstrap.min.css?body=1" media="all" rel="stylesheet" type="text/css">
+  <link href="/assets/bootstrap-responsive.min.css?body=1" media="all" rel="stylesheet" type="text/css">
+  <link href="/assets/fighter.css?body=1" media="all" rel="stylesheet" type="text/css">
   <script src="/assets/jquery.js?body=1" type="text/javascript"></script>
   <script src="/assets/jquery_ujs.js?body=1" type="text/javascript"></script>
   <script src="/assets/twitter/bootstrap/bootstrap-transition.js?body=1" type="text/javascript"></script>
@@ -32,7 +35,6 @@
   <script src="/assets/backbone_rails_sync.js?body=1" type="text/javascript"></script>
   <script src="/assets/backbone_datalink.js?body=1" type="text/javascript"></script>
   <script src="/assets/backbone/secretdino.js?body=1" type="text/javascript"></script>
-  <script src="/assets/bootstrap.js?body=1" type="text/javascript"></script>
   <script src="/assets/fighter.js?body=1" type="text/javascript"></script>
   <%= csrf_meta_tags %>
   <script type="text/javascript">
@@ -58,7 +60,7 @@
       </button>
       <div class="nav-collapse collapse">
         <ul class="nav">
-          <li class="active"><a href="./">Home</a></li>
+          <li class="active"><a href="/">Home</a></li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Projects <b class="caret"></b></a>
             <ul class="dropdown-menu">

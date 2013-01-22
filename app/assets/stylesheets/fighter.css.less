@@ -2,6 +2,10 @@
 // They will automatically be included in application.css.
 // You can use Less here: http://lesscss.org/
 
+body {
+  padding-top: 35px;
+}
+
 h1 {
   text-align: center;
   color: #fff;
@@ -20,20 +24,20 @@ h1 {
 }
 
 .console {
-  width: 1170px;
+  width: 1000px;
   height: 400px;
+  margin: 0 auto;
   background: url(/assets/sprites/fighter/japan_stage.png);
   background-repeat: no-repeat;
   background-size: 100% 75%;
   padding: 20px;
 }
 
-.source-image {
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -5000;
+.modal {
+  // Override the default modal style settings
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 .player {
@@ -186,4 +190,14 @@ h1 {
   }
 }
 
-
+.ko {
+  text-align: center;
+  font-weight: bold;
+  font-size: 99px;
+  color: #df0101;
+  text-shadow: 0px 1px 0 #ff4000,
+               0px 2px 0 #ff4000,
+               0px 3px 0 #ff8000,
+               0px 4px 0 #fe9a2e,
+               0px 5px 3px #000;
+}

@@ -31,7 +31,6 @@ end
 
 gem 'jquery-rails'
 gem 'rails-backbone'
-#gem 'less-rails'
 gem 'twitter-bootstrap-rails', '2.1.9'
 
 

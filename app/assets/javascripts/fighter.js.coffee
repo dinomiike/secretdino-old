@@ -160,6 +160,7 @@ $ ->
         result[0].hp = 0
         result[0].percenthealth = 0
         console.log "K.O."
+        $("#koModal").modal("show")
       else
         # If not, update percenthealth property
         result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
