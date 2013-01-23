@@ -152,18 +152,29 @@ $ ->
   window.hit = (result) ->
     # Look at the first item of the result array
     if Object.prototype.toString.call(result[0]) == "[object Object]"
-      # Hit impacts opponent hp
+      # Hit impacts opponent hp, if opponent hp is below 0, set it to 0, otherwise set it to the value
       result[0].hp -= result[1]
-      # Is the player KO'd?
-      if result[0].isKO()
-        # Always set the hp to 0 on KO
+      result[0].hp = result[0].hp - result[1] < 0 ? 0 : result[0].hp - result[1]
+      if result[0].hp - result[1] < 0
         result[0].hp = 0
         result[0].percenthealth = 0
-        console.log "K.O."
-        $("#koModal").modal("show")
       else
-        # If not, update percenthealth property
+        result[0].hp -= result[1]
         result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
+
+      ## Is the player KO'd?
+      #if result[0].isKO()
+      #  # Always set the hp to 0 on KO
+      #  result[0].hp = 0
+      #  result[0].percenthealth = 0
+      #  console.log "K.O."
+      #  $("#koModal").modal("show")
+      #else
+      #  # If not, update percenthealth property
+      #  result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
+      
+
+
       # Reduce target health meter
       $("."+result[2]+" .bar .meter-full").attr("style", "width: "+result[0].percenthealth+"%")
       # Check target health bar color
@@ -219,7 +230,21 @@ $ ->
     if atkStack.p1.action? && atkStack.p2.action?
       if atkStack.p1.action != "block"
         if atkStack.p2.action != "block"
+          # Hit the player without frame advantage
           hit(frameAdv())
+          # Anybody knocked out?
+          if p1.isKO() && p2.isKO()
+            # Double KO! It does exist!!
+            $(".ko").text("Double K.O.")
+            $("#koModal").modal("show")
+          else if p1.isKO()
+            # P1 KO'd!
+            $(".ko").text("K.O.")
+            $("#koModal").modal("show")
+          else
+            # P2 KO'd!
+            $(".ko").text("K.O.)
+            $("#koModal").modal("show")
         else
           console.log "Nai"
 
