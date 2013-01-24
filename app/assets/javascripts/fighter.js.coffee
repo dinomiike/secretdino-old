@@ -196,30 +196,31 @@ $ ->
   # result[1] is the amount of damage this player is taking
   # result[2] is the string id of the player, used for CSS
   window.hit = (result) ->
-    # Look at the first item of the result array, if it's [object Array], it's a trade, both players are hit
-    if Object.prototype.toString.call(result[0]) == "[object Object]"
-      # Hit impacts opponent hp, if opponent hp is below 0, set it to 0, otherwise set it to the value
-      if result[0].hp - result[1] < 0
-        result[0].hp = 0
-        result[0].percenthealth = 0
-      else
-        result[0].hp -= result[1]
-        result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
+    if typeof result != "undefined"
+      # Look at the first item of the result array, if it's [object Array], it's a trade, both players are hit
+      if Object.prototype.toString.call(result[0]) == "[object Object]"
+        # Hit impacts opponent hp, if opponent hp is below 0, set it to 0, otherwise set it to the value
+        if result[0].hp - result[1] < 0
+          result[0].hp = 0
+          result[0].percenthealth = 0
+        else
+          result[0].hp -= result[1]
+          result[0].percenthealth = (result[0].hp/result[0].maxhealth)*100
 
-      # Reduce target health meter
-      $("."+result[2]+" .bar .meter-full").attr("style", "width: "+result[0].percenthealth+"%")
-      # Check target health bar color
-      colorCheck = result[0].healthColor()
-      if colorCheck != result[0].metercolor
-        result[0].metercolor = colorCheck
-        $("."+result[2]+" .bar .meter-full").addClass(colorCheck)
-        colorCheck = ""
-      $("."+result[2]+" .hp").text(result[0].hp)
-    else
-      console.log "trade!!"
-      # In the event of a trade, let's run hit on each item in the array
-      # TODO: Modify result damage from both players to dmg * 0.75 (on trade only), since full dmg shouldn't be possible
-      _.each(result, hit)
+        # Reduce target health meter
+        $("."+result[2]+" .bar .meter-full").attr("style", "width: "+result[0].percenthealth+"%")
+        # Check target health bar color
+        colorCheck = result[0].healthColor()
+        if colorCheck != result[0].metercolor
+          result[0].metercolor = colorCheck
+          $("."+result[2]+" .bar .meter-full").addClass(colorCheck)
+          colorCheck = ""
+          $("."+result[2]+" .hp").text(result[0].hp)
+      else
+        console.log "trade!!"
+        # In the event of a trade, let's run hit on each item in the array
+        # TODO: Modify result damage from both players to dmg * 0.75 (on trade only), since full dmg shouldn't be possible
+        _.each(result, hit)
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
