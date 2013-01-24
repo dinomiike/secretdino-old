@@ -116,32 +116,78 @@ $ ->
   # Helper functions
 
   # Frame Advantage, invoked by the Play button click event
+  # Determines the player who has frame advantage and returns the player(s) who should be hit (aka sent to hit())
   window.frameAdv = ->
-    p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
-    p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
-    if p1Startup < p2Startup
-      # Set p1 frame status to the total frames of their attack
-      setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
-                         p1.normals[atkStack.p1.action].active +
-                         p1.normals[atkStack.p1.action].recovery)
-      # P2 receives the hit stun from the attack
-      setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
-      # Return the player who will be hit and the damage amount
-      return [p2, p1.normals[atkStack.p1.action].damage, "two"];
-    else if p2Startup < p1Startup
-      # Set P2 frame status to the total frames of the attack
-      setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
-                         p2.normals[atkStack.p2.action].active +
-                         p2.normals[atkStack.p2.action].recovery)
-      # P1 receives the hit stun from the attack
-      setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
-      # Return the player who will be hit
-      return [p1, p2.normals[atkStack.p2.action].damage, "one"]
-    else if p1Startup == p2Startup
-      # Trade! Both players are hit, send both to the hit function
-      return [[p1, p2.normals[atkStack.p2.action].damage, "one"], [p2, p1.normals[atkStack.p1.action].damage, "two"]]
+    # 1. Did player 1 block?
+    #   Y.
+    #     A. Did player 2 block?
+    #       Y. Both blocked: frame reset, return
+    #       N. Player 2 has frame advantage
+    #         - Player 1 gets block stun
+    #         - Player 2 get total frames
+    #         - Return Player 1 (as hit) with 0 damage
+    #   N.
+    #     A. Did player 2 block?
+    #       Y. Player 1 has frame advantaae
+    #         - Player 2 gets block stun
+    #         - Player 1 gets total frames
+    #         - Return Player 2 (as hit) with 0 damage
+    #       N. Determine frame advantage and who will get hit
+
+    if atkStack.p1.action == "block"
+      if atkStack.p2.action == "block"
+        # Both players blocked, the frames are reset
+        return
+      else
+        # P1 blocked, P2 did not, P2 has frame advantage
+        # Set P1 block stun
+        setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.block)
+        # Set P2 total frames
+        setFrameStatus(p2, p2.normals[atkStack.p2.action].startup + 
+                           p2.normals[atkStack.p2.action].active + 
+                           p2.normals[atkStack.p2.action].recovery)
+        # Return P1 to hit(): Damage is 0 because p1 blocked
+        return [p1, 0, "one"]
+    else
+      if atkStack.p2.action == "block"
+        # P1 did not block, P2 did, P1 has frame advantage
+        # Set P2 block stun
+        setFrameStatus(p2, p1.normal[atkStack.p1.action].stun.block)
+        # Set P1 total frames
+        setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
+                           p1.normals[atkStack.p1.action].active + 
+                           p1.normals[atkStack.p1.action].recovery)
+        # Return P2 to hit(): Damage is 0 because p2 blocked
+        return [p2, 0, "two"]
+      else
+        # Determine frame advantage as lowest sum of frame disadvantage and startup frames of each players normal
+        p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
+        p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
+        if p1Startup < p2Startup
+          # p1 lands the attack: Set p1 frame status to the total frames of their attack
+          setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
+                             p1.normals[atkStack.p1.action].active +
+                             p1.normals[atkStack.p1.action].recovery)
+          # p2 receives the hit stun from the attack
+          setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
+          # Return the player who will be hit and the damage amount
+          return [p2, p1.normals[atkStack.p1.action].damage, "two"];
+        else if p2Startup < p1Startup
+          # p2 lands the attack: Set p2 frame status to the total frames of the attack
+          setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
+                             p2.normals[atkStack.p2.action].active +
+                             p2.normals[atkStack.p2.action].recovery)
+          # p1 receives the hit stun from the attack
+          setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
+          # Return the player who will be hit
+          return [p1, p2.normals[atkStack.p2.action].damage, "one"]
+        else if p1Startup == p2Startup
+          # Trade! Both players are hit, send both to the hit function
+          return [[p1, p2.normals[atkStack.p2.action].damage, "one"], [p2, p1.normals[atkStack.p1.action].damage, "two"]]
 
   # Set the frame status property of the player sent to this function
+  # TODO: This should be scoped within frameAdv() because only that function should be setting frames
+  # Leaving it like this for now to test
   window.setFrameStatus = (player, frames) ->
     player.framestatus = frames
 
@@ -225,10 +271,12 @@ $ ->
         # P1 KO'd!
         $(".ko").text("K.O.")
         $("#koModal").modal("show")
-      else
+      else if p2.isKO()
         # P2 KO'd!
         $(".ko").text("K.O.")
         $("#koModal").modal("show")
+      else
+        # The fight continues!
 
       # Reset the player action descriptions
       $(".one .action").text("")
