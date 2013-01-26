@@ -11,6 +11,7 @@ $ ->
     this.percenthealth = 100
     this.metercolor = "meter-full"
     this.linklimit = linklimit
+    this.linkpoints = 0
     this.framestatus = 0
     this.sprite = sprite
     this.normals = normals
@@ -41,6 +42,7 @@ $ ->
       startup: 3
       active: 3
       recovery: 6
+      weight: 2
       stun:
         hit: 13
         block: 9
@@ -51,6 +53,7 @@ $ ->
       startup: 3
       active: 3
       recovery: 12 
+      weight: 3
       stun:
         hit: 19
         block: 13
@@ -61,6 +64,7 @@ $ ->
       startup: 5
       active: 7
       recovery: 26
+      weight: 6
       stun:
         hit: 40
         block: 26
@@ -77,6 +81,7 @@ $ ->
       startup: 3 # normally 4, change it back later
       active: 4
       recovery: 9
+      weight: 2
       stun:
         hit: 16
         block: 10
@@ -87,6 +92,7 @@ $ ->
       startup: 10
       active: 3
       recovery: 14
+      weight: 3
       stun:
         hit: 18
         block: 13
@@ -97,6 +103,7 @@ $ ->
       startup: 10
       active: 6
       recovery: 16
+      weight: 6
       stun:
         hit: 20
         block: 15
@@ -106,11 +113,13 @@ $ ->
   window.p2 = new Player "Dhalsim", 100, 6, "dhalsim-p2.gif", p2normals
 
   # Initialize the attack storage record
+  # Currently doesn't function as a stack but I think it will be when the game is finished
   window.atkStack =
     p1:
       action: null
     p2:
       action: null
+    exchange: null
 
   ##########################################################################################
   # Helper functions
@@ -124,12 +133,14 @@ $ ->
     #       Y. Both blocked: frame reset, return
     #       N. Player 2 has frame advantage
     #         - Player 1 gets block stun
+    #         - Player 2 wins the exchange
     #         - Player 2 get total frames
     #         - Return Player 1 (as hit) with 0 damage
     #   N.
     #     A. Did player 2 block?
     #       Y. Player 1 has frame advantaae
     #         - Player 2 gets block stun
+    #         - Player 1 wins the exchange
     #         - Player 1 gets total frames
     #         - Return Player 2 (as hit) with 0 damage
     #       N. Determine frame advantage and who will get hit
@@ -139,9 +150,15 @@ $ ->
         # Both players blocked, the frames are reset
         return
       else
-        # P1 blocked, P2 did not, P2 has frame advantage
-        # Set P1 block stun
+        # p1 blocked, p2 did not, p2 has frame advantage
+        # Set p1 block stun
         setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.block)
+        # p2 wins the exchange
+        atkStack.exchange = p2
+        # Add lp of this normal to p2
+        p2.linkpoints += p2.normals[atkStack.p2.action].weight
+        # Check for pushback
+        isPushback()
         # Set P2 total frames
         setFrameStatus(p2, p2.normals[atkStack.p2.action].startup + 
                            p2.normals[atkStack.p2.action].active + 
@@ -153,6 +170,12 @@ $ ->
         # P1 did not block, P2 did, P1 has frame advantage
         # Set P2 block stun
         setFrameStatus(p2, p1.normal[atkStack.p1.action].stun.block)
+        # p1 wins the exchange
+        atkStack.exchange = p1
+        # Add lp of this normal to p1
+        p1.linkpoints += p1.normals[atkStack.p1.action].weight
+        # Check for pushback
+        isPushback()
         # Set P1 total frames
         setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
                            p1.normals[atkStack.p1.action].active + 
@@ -164,7 +187,13 @@ $ ->
         p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
         p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
         if p1Startup < p2Startup
-          # p1 lands the attack: Set p1 frame status to the total frames of their attack
+          # p1 lands the attack
+          atkStack.exchange = p1
+          # Add lp of this normal to p1
+          p1.linkpoints += p1.normals[atkStack.p1.action].weight
+          # Check for pushback
+          isPushback()
+          #Set p1 frame status to the total frames of their attack
           setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
                              p1.normals[atkStack.p1.action].active +
                              p1.normals[atkStack.p1.action].recovery)
@@ -173,7 +202,12 @@ $ ->
           # Return the player who will be hit and the damage amount
           return [p2, p1.normals[atkStack.p1.action].damage, "two"];
         else if p2Startup < p1Startup
-          # p2 lands the attack: Set p2 frame status to the total frames of the attack
+          # p2 lands the attack
+          atkStack.exchange = p2
+          # Add lp of this normal to p2
+          p2.linkpoints += p2.normals[atkStack.p2.action].weight
+          isPushback()
+          #Set p2 frame status to the total frames of the attack
           setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
                              p2.normals[atkStack.p2.action].active +
                              p2.normals[atkStack.p2.action].recovery)
@@ -182,7 +216,12 @@ $ ->
           # Return the player who will be hit
           return [p1, p2.normals[atkStack.p2.action].damage, "one"]
         else if p1Startup == p2Startup
-          # Trade! Both players are hit, send both to the hit function
+          # Trade! Nobody won the exchange
+          atkStack.exchange = null
+          # A trade resets anyone's possible combo string, so return to 0
+          p1.linkpoints = 0
+          p2.linkpoints = 0
+          #Both players are hit, send both to the hit function
           return [[p1, p2.normals[atkStack.p2.action].damage, "one"], [p2, p1.normals[atkStack.p1.action].damage, "two"]]
 
   # Set the frame status property of the player sent to this function
@@ -221,6 +260,14 @@ $ ->
         # In the event of a trade, let's run hit on each item in the array
         # TODO: Modify result damage from both players to dmg * 0.75 (on trade only), since full dmg shouldn't be possible
         _.each(result, hit)
+
+  # Pushback: If attacker has hit the opponent too many times, the opponent gets pushed back.
+  # This prevents 1-combo-kills. Pushed back opponent is out of range for another hit and they incur a penalty of 
+  # pushback frames that is equal to half of the total frames that sent them into pushback status. Frames added to
+  # the startup of opponent's next move, as they need additional time to get their body back into position to fight
+  window.isPushback = ->
+    if atkStack.exchange.linkpoints >= atkStack.exchange.linklimit
+      console.log "Pushback!"
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
