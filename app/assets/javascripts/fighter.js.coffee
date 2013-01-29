@@ -71,14 +71,14 @@ $ ->
         value: 200
   }
   # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
-  window.p1 = new Player "Ryu", 100, 6, "ryu-p1.gif", p1normals
+  window.p1 = new Player "Ryu", 1000, 6, "ryu-p1.gif", p1normals
 
   # Initialize player 2!
   p2normals = {
     a:
       range: 1
       damage: 30
-      startup: 3 # normally 4, change it back later
+      startup: 4 # normally 4, change it back later
       active: 4
       recovery: 9
       weight: 2
@@ -110,7 +110,7 @@ $ ->
         value: 140
   }
   # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
-  window.p2 = new Player "Dhalsim", 100, 6, "dhalsim-p2.gif", p2normals
+  window.p2 = new Player "Dhalsim", 1000, 6, "dhalsim-p2.gif", p2normals
 
   # Initialize the attack storage record
   # Currently doesn't function as a stack but I think it will be when the game is finished
@@ -151,35 +151,43 @@ $ ->
         return
       else
         # p1 blocked, p2 did not, p2 has frame advantage
-        # Set p1 block stun
-        setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.block)
-        # p2 wins the exchange
-        atkStack.exchange = p2
-        # Add lp of this normal to p2
+        # Add lp of this normal to p2, even if blocked, the pushback amount is the same
         p2.linkpoints += p2.normals[atkStack.p2.action].weight
         # Check for pushback
-        isPushback()
-        # Set P2 total frames
-        setFrameStatus(p2, p2.normals[atkStack.p2.action].startup + 
-                           p2.normals[atkStack.p2.action].active + 
-                           p2.normals[atkStack.p2.action].recovery)
+        if isPushback()
+          # Frame reset for both players
+          setFrameStatus(p1, 0)
+          setFrameStatus(p2, 0)
+        else
+          # Set p1 block stun
+          setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.block)
+          # p2 wins the exchange
+          atkStack.exchange = p2
+          # Set P2 total frames
+          setFrameStatus(p2, p2.normals[atkStack.p2.action].startup + 
+                             p2.normals[atkStack.p2.action].active + 
+                             p2.normals[atkStack.p2.action].recovery)
         # Return P1 to hit(): Damage is 0 because p1 blocked
         return [p1, 0, "one"]
     else
       if atkStack.p2.action == "block"
         # P1 did not block, P2 did, P1 has frame advantage
-        # Set P2 block stun
-        setFrameStatus(p2, p1.normal[atkStack.p1.action].stun.block)
-        # p1 wins the exchange
-        atkStack.exchange = p1
         # Add lp of this normal to p1
         p1.linkpoints += p1.normals[atkStack.p1.action].weight
         # Check for pushback
-        isPushback()
-        # Set P1 total frames
-        setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
-                           p1.normals[atkStack.p1.action].active + 
-                           p1.normals[atkStack.p1.action].recovery)
+        if isPushback()
+          # Frame reset for both players
+          setFrameStatus(p1, 0)
+          setFrameStatus(p2, 0)
+        else
+          # Set P2 block stun
+          setFrameStatus(p2, p1.normal[atkStack.p1.action].stun.block)
+          # p1 wins the exchange
+          atkStack.exchange = p1
+          # Set P1 total frames
+          setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
+                             p1.normals[atkStack.p1.action].active + 
+                             p1.normals[atkStack.p1.action].recovery)
         # Return P2 to hit(): Damage is 0 because p2 blocked
         return [p2, 0, "two"]
       else
@@ -187,32 +195,45 @@ $ ->
         p1Startup = p1.framestatus + p1.normals[atkStack.p1.action].startup
         p2Startup = p2.framestatus + p2.normals[atkStack.p2.action].startup
         if p1Startup < p2Startup
-          # p1 lands the attack
-          atkStack.exchange = p1
           # Add lp of this normal to p1
           p1.linkpoints += p1.normals[atkStack.p1.action].weight
           # Check for pushback
-          isPushback()
-          #Set p1 frame status to the total frames of their attack
-          setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
-                             p1.normals[atkStack.p1.action].active +
-                             p1.normals[atkStack.p1.action].recovery)
-          # p2 receives the hit stun from the attack
-          setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
+          # TODO: If pushback is made, isPushback should be resetting lp of the exchange winner
+          if isPushback()
+            # p1 lands the attack, now reset the exchange winner
+            atkStack.exchange = null
+            # Frame reset for both players
+            setFrameStatus(p1, 0)
+            setFrameStatus(p2, 0)
+          else
+            # p1 lands the attack but hasn't broken the link limit
+            atkStack.exchange = p1
+            # Set p1 frame status to the total frames of their attack
+            setFrameStatus(p1, p1.normals[atkStack.p1.action].startup + 
+                               p1.normals[atkStack.p1.action].active +
+                               p1.normals[atkStack.p1.action].recovery)
+            # p2 receives the hit stun from the attack
+            setFrameStatus(p2, p1.normals[atkStack.p1.action].stun.hit)
           # Return the player who will be hit and the damage amount
           return [p2, p1.normals[atkStack.p1.action].damage, "two"];
         else if p2Startup < p1Startup
-          # p2 lands the attack
-          atkStack.exchange = p2
           # Add lp of this normal to p2
           p2.linkpoints += p2.normals[atkStack.p2.action].weight
-          isPushback()
-          #Set p2 frame status to the total frames of the attack
-          setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
-                             p2.normals[atkStack.p2.action].active +
-                             p2.normals[atkStack.p2.action].recovery)
-          # p1 receives the hit stun from the attack
-          setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
+          if isPushback()
+            # p2 lands the attack, now reset the exchange winner
+            atkStack.exchange = null
+            # Frame reset for both players
+            setFrameStatus(p1, 0)
+            setFrameStatus(p2, 0)
+          else
+            # p2 lands the attack but hasn't broken the link limit
+            atkStack.exchange = p2
+            # Set p2 frame status to the total frames of the attack
+            setFrameStatus(p2, p2.normals[atkStack.p2.action].startup +
+                               p2.normals[atkStack.p2.action].active +
+                               p2.normals[atkStack.p2.action].recovery)
+            # p1 receives the hit stun from the attack
+            setFrameStatus(p1, p2.normals[atkStack.p2.action].stun.hit)
           # Return the player who will be hit
           return [p1, p2.normals[atkStack.p2.action].damage, "one"]
         else if p1Startup == p2Startup
@@ -268,6 +289,10 @@ $ ->
   window.isPushback = ->
     if atkStack.exchange.linkpoints >= atkStack.exchange.linklimit
       console.log "Pushback!"
+      # reset stuff!!
+      return true
+    else
+      return false
 
   # Populate the character dom elements
   $(".one .name").append(p1.name)
