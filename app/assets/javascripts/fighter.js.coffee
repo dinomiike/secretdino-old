@@ -287,9 +287,16 @@ $ ->
   # pushback frames that is equal to half of the total frames that sent them into pushback status. Frames added to
   # the startup of opponent's next move, as they need additional time to get their body back into position to fight
   window.isPushback = ->
-    if atkStack.exchange.linkpoints >= atkStack.exchange.linklimit
+    if atkStack.exchange != null && atkStack.exchange.linkpoints >= atkStack.exchange.linklimit
       console.log "Pushback!"
-      # reset stuff!!
+      # On Pushback, perform a frame and link reset
+      p1.linklimit = 0
+      p1.linkpoints = 0
+      p1.framestatus = 0
+
+      p2.linklimit = 0
+      p2.linkpoints = 0
+      p2.framestatus = 0
       return true
     else
       return false
