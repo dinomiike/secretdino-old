@@ -44,9 +44,9 @@ $ ->
       recovery: 6
       weight: 2
       stun:
-        hit: 13
-        block: 9
-        value: 50
+        hit: 10 #13
+        block: 7 #9
+        value: 25 #50
     b:
       range: 1
       damage: 70
@@ -55,9 +55,9 @@ $ ->
       recovery: 12 
       weight: 3
       stun:
-        hit: 19
-        block: 13
-        value: 100
+        hit: 15 #19
+        block: 10 #13
+        value: 50 #100
     c:
       range: 1
       damage: 100
@@ -66,9 +66,9 @@ $ ->
       recovery: 26
       weight: 6
       stun:
-        hit: 40
-        block: 26
-        value: 200
+        hit: 30 #40
+        block: 20 #26
+        value: 75 #200
   }
   # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
   window.p1 = new Player "Ryu", 1000, 6, "ryu-p1.gif", p1normals
