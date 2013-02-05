@@ -44,9 +44,9 @@ $ ->
       recovery: 6
       weight: 2
       stun:
-        hit: 10 #13
-        block: 7 #9
-        value: 25 #50
+        hit: 13
+        block: 9
+        value: 50
     b:
       range: 1
       damage: 70
@@ -55,20 +55,20 @@ $ ->
       recovery: 12 
       weight: 3
       stun:
-        hit: 15 #19
-        block: 10 #13
-        value: 50 #100
+        hit: 19
+        block: 13
+        value: 100
     c:
       range: 1
       damage: 100
       startup: 5
       active: 7
       recovery: 26
-      weight: 6
+      weight: 7
       stun:
-        hit: 30 #40
-        block: 20 #26
-        value: 75 #200
+        hit: 40
+        block: 26
+        value: 200
   }
   # Player parameters: Name, HP, LinkLimit, Sprite (image name), Normals (object)
   window.p1 = new Player "Ryu", 1000, 6, "ryu-p1.gif", p1normals
@@ -78,7 +78,7 @@ $ ->
     a:
       range: 1
       damage: 30
-      startup: 4 # normally 4, change it back later
+      startup: 3 # normally 4, change it back later
       active: 4
       recovery: 9
       weight: 2
@@ -103,7 +103,7 @@ $ ->
       startup: 10
       active: 6
       recovery: 16
-      weight: 6
+      weight: 7
       stun:
         hit: 20
         block: 15
@@ -120,6 +120,15 @@ $ ->
     p2:
       action: null
     exchange: null
+
+  # Initialize the status helpers on the page
+  $(".one .status .frameStatus .label").text(p1.framestatus)
+  $(".one .status .linkLimit .label").text(p1.linklimit)
+  $(".one .status .linkPoints .label").text(p1.linkpoints)
+
+  $(".two .status .frameStatus .label").text(p2.framestatus)
+  $(".two .status .linkLimit .label").text(p2.linklimit)
+  $(".two .status .linkPoints .label").text(p2.linkpoints)
 
   ##########################################################################################
   # Helper functions
@@ -365,6 +374,15 @@ $ ->
       # Reset the atkStack
       atkStack.p1.action = null
       atkStack.p2.action = null
+
+      # Update the status display
+      $(".one .status .frameStatus .label").text(p1.framestatus)
+      $(".one .status .linkLimit .label").text(p1.linklimit)
+      $(".one .status .linkPoints .label").text(p1.linkpoints)
+
+      $(".two .status .frameStatus .label").text(p2.framestatus)
+      $(".two .status .linkLimit .label").text(p2.linklimit)
+      $(".two .status .linkPoints .label").text(p2.linkpoints)
     else
       console.log "Both players must submit attacks to play"
   )
